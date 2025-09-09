@@ -1,0 +1,106 @@
+-- ================================
+-- Create Tables for VideoGameCRM (SQL Server)
+-- ================================
+
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'VideoGameCRM')
+    CREATE DATABASE VideoGameCRM;
+GO
+USE VideoGameCRM;
+GO
+
+-- 1. Games Table
+CREATE TABLE Games (
+    game_id INT IDENTITY(1,1) PRIMARY KEY,
+    app_id NVARCHAR(50) NOT NULL,
+    app_name NVARCHAR(255) NOT NULL,
+    genre NVARCHAR(100),
+    release_date DATE,
+    developer NVARCHAR(255),
+    publisher NVARCHAR(255)
+);
+
+-- 2. Reviewers Table
+CREATE TABLE Reviewers (
+    reviewer_id INT IDENTITY(1,1) PRIMARY KEY,
+    username NVARCHAR(100) NOT NULL,
+    profile_url NVARCHAR(255),
+    total_reviews INT DEFAULT 0,
+    total_helpfulness_votes INT DEFAULT 0
+);
+
+-- 3. Reviews Table
+CREATE TABLE Reviews (
+    review_id INT IDENTITY(1,1) PRIMARY KEY,
+    game_id INT NOT NULL,
+    review_text NVARCHAR(MAX),
+    review_score NVARCHAR(20) CHECK (review_score IN ('Recommended','Not Recommended')),
+    predicted_sentiment NVARCHAR(20) CHECK (predicted_sentiment IN ('Positive','Negative','Neutral')),
+    confidence_score DECIMAL(5,2),
+    review_votes INT DEFAULT 0,
+    review_date DATE,
+    reviewer_id INT,
+    FOREIGN KEY (game_id) REFERENCES Games(game_id),
+    FOREIGN KEY (reviewer_id) REFERENCES Reviewers(reviewer_id)
+);
+
+-- 4. Sentiment_Summary Table
+CREATE TABLE Sentiment_Summary (
+    summary_id INT IDENTITY(1,1) PRIMARY KEY,
+    game_id INT NOT NULL,
+    date_range_start DATE,
+    date_range_end DATE,
+    positive_count INT DEFAULT 0,
+    negative_count INT DEFAULT 0,
+    neutral_count INT DEFAULT 0,
+    avg_confidence DECIMAL(5,2),
+    trend_direction NVARCHAR(10) CHECK (trend_direction IN ('Up','Down','Stable')),
+    FOREIGN KEY (game_id) REFERENCES Games(game_id)
+);
+
+-- 5. Users Table
+CREATE TABLE Users (
+    user_id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(100),
+    email NVARCHAR(150) UNIQUE,
+    role NVARCHAR(20) CHECK (role IN ('Admin','Analyst','Marketing')),
+    password_hash NVARCHAR(255)
+);
+
+-- 6. Alerts Table
+CREATE TABLE Alerts (
+    alert_id INT IDENTITY(1,1) PRIMARY KEY,
+    game_id INT NOT NULL,
+    alert_type NVARCHAR(100),
+    alert_message NVARCHAR(MAX),
+    alert_date DATE,
+    status NVARCHAR(20) CHECK (status IN ('Open','Assigned','Resolved')) DEFAULT 'Open',
+    assigned_to INT,
+    FOREIGN KEY (game_id) REFERENCES Games(game_id),
+    FOREIGN KEY (assigned_to) REFERENCES Users(user_id)
+);
+
+-- 7. Tags Table
+CREATE TABLE Tags (
+    tag_id INT IDENTITY(1,1) PRIMARY KEY,
+    tag_name NVARCHAR(100) UNIQUE
+);
+
+-- 8. Review_Tags Table (junction table)
+CREATE TABLE Review_Tags (
+    review_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (review_id, tag_id),
+    FOREIGN KEY (review_id) REFERENCES Reviews(review_id),
+    FOREIGN KEY (tag_id) REFERENCES Tags(tag_id)
+);
+
+-- 9. Model_History Table
+CREATE TABLE Model_History (
+    model_id INT IDENTITY(1,1) PRIMARY KEY,
+    model_name NVARCHAR(100),
+    version NVARCHAR(50),
+    date_uploaded DATE,
+    precision DECIMAL(5,2),
+    recall DECIMAL(5,2),
+    f1_score DECIMAL(5,2)
+);

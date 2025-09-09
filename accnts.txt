@@ -1,0 +1,11 @@
+Admin
+admin@admin.com
+admin123
+
+analyst
+analyst@test.com
+analyst123
+
+market 
+market@market.com
+market123
