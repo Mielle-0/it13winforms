@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
+    <PackageReference Include="itext7" Version="8.0.2" />
+    <PackageReference Include="itext7.bouncy-castle-adapter" Version="8.0.2" />
     <PackageReference Include="Krypton.Navigator" Version="95.25.8.235" />
     <PackageReference Include="Krypton.Toolkit" Version="95.25.8.235" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />

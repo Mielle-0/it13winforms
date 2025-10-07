@@ -47,27 +47,6 @@ namespace it13Project.Pages
         {
             alertsGrid.Rows.Add(time, game, review, sentiment, alertType, link);
         }
-
-        private List<AlertInfo> GetSampleAlerts()
-        {
-            return new List<AlertInfo>
-            {
-                new AlertInfo
-                {
-                    Game = "Overwatch 2",
-                    Description = "Sentiment dropped 15% in last 7 days",
-                    Severity = "High",
-                    Date = "2025-09-02"
-                },
-                new AlertInfo
-                {
-                    Game = "Starfield",
-                    Description = "Sentiment dropped 8% in last 7 days",
-                    Severity = "Medium",
-                    Date = "2025-09-01"
-                }
-            };
-        }
         
         private void AlertsGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
@@ -83,14 +62,5 @@ namespace it13Project.Pages
                 };
             }
         }
-    }
-
-
-    public class AlertInfo
-    {
-        public string? Game { get; set; }
-        public string? Description { get; set; }
-        public string? Severity { get; set; }
-        public string? Date { get; set; }
     }
 }

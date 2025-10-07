@@ -24,7 +24,9 @@ namespace it13Project.Pages
 
         private void DashboardControl_Load(object sender, EventArgs e)
         {
-            PopulateSampleData();
+            PopulateKpiCards();
+            PopulateCharts();
+            PopulateList();
         }
 
         private void LoadAlerts(ListView listView)
@@ -55,10 +57,125 @@ namespace it13Project.Pages
                 listView.Items.Add(item);
             }
         }
-        
-        private void PopulateSampleData()
+
+        private void PopulateKpiCards()
         {
-            // --- Alerts List ---
+            try
+            {
+                kpiLayout.Controls.Clear();
+
+                // kpiLayout.Controls.Add(
+                //     CreateModernStatPanel(
+                //         Properties.Resources.iconGame,
+                //         "Review / Total Games",
+                //         DashboardService.GetTotalGames().ToString("N0"),
+                //         Color.FromArgb(52, 152, 219)
+                //     )
+                // );
+
+                var (totalGames, reviewedGames) = DashboardService.GetReviewedTotalGames();
+
+                kpiLayout.Controls.Add(
+                    CreateModernStatPanel(
+                        Properties.Resources.iconGame,
+                        "Reviewed / Total Games",
+                        $"{reviewedGames:N0} / {totalGames:N0}",
+                        Color.FromArgb(52, 152, 219)
+                    )
+                );
+
+                kpiLayout.Controls.Add(
+                    CreateModernStatPanel(
+                        Properties.Resources.iconReviews,
+                        "Total Reviews",
+                        DashboardService.GetTotalReviews().ToString("N0"),
+                        Color.FromArgb(46, 204, 113)
+                    )
+                );
+
+                kpiLayout.Controls.Add(
+                    CreateModernStatPanel(
+                        Properties.Resources.iconSentiment,
+                        "Avg. Sentiment",
+                        DashboardService.GetAverageSentiment().ToString("F0") + "%",
+                        Color.FromArgb(155, 89, 182)
+                    )
+                );
+
+                kpiLayout.Controls.Add(
+                    CreateModernStatPanel(
+                        Properties.Resources.iconRecommend,
+                        // "% Recommended",
+                        "# of Reviewers",
+                        DashboardService.GetTotalReviewers().ToString("N0"),
+                        // DashboardService.GetPercentRecommended().ToString("F0") + "%",
+                        Color.FromArgb(241, 196, 15)
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load KPI cards.\n\nError: " + ex.Message,
+                    "Database Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+
+        private void PopulateCharts()
+        {
+            try
+            {
+                // Sentiment Trend
+                var sentimentTrend = DashboardService.GetSentimentTrend();
+                chartsLayout.Controls.Add(
+                    CreateModernSectionPanel(
+                        "Sentiment Trend",
+                        graphType: GraphType.Signal,
+                        dataX: sentimentTrend.Dates.Select(d => d.ToOADate()).ToArray(), // DateTime → double
+                        dataY: sentimentTrend.Scores.ToArray()                          // List<double> → double[]
+                    ), 0, 0);
+
+                // Review Volume
+                var reviewVolume = DashboardService.GetReviewVolume();
+                chartsLayout.Controls.Add(
+                    CreateModernSectionPanel(
+                        "Review Volume",
+                        graphType: GraphType.Bar,
+                        dataX: reviewVolume.Dates.Select(d => d.ToOADate()).ToArray(),  // DateTime → double
+                        dataY: reviewVolume.Counts.Select(c => (double)c).ToArray()     // int → double
+                    ), 1, 0);
+
+                // Top 5 Games
+                var top5Games = DashboardService.GetTop5Games();
+                chartsLayout.Controls.Add(
+                    CreateModernSectionPanel(
+                        "Highest Reviews",
+                        dataY: top5Games.Counts.Select(c => (double)c).ToArray(),
+                        labels: top5Games.GameNames.ToArray(),
+                        graphType: GraphType.Bar
+                    ), 2, 0);
+
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load charts.\n\nError: " + ex.Message,
+                    "Database Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+
+        private void PopulateList()
+        {
             alertsListView.Items.Clear();
 
             var alert1 = new ListViewItem("Cyberpunk 2077");

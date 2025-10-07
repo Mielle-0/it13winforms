@@ -127,6 +127,36 @@ namespace it13Project.Pages
 
             grpThresholds.Panel.Controls.Add(threshLayout);
 
+            // === Model Management ===
+            var grpModelMgmt = CreateHeaderGroup("Model Management", 200);
+
+            var modelLayout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, AutoSize = true };
+            modelLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 180));
+            modelLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+
+            // Model List
+            modelLayout.Controls.Add(new KryptonLabel { Text = "Available Models:", StateCommon = { ShortText = { Color1 = System.Drawing.Color.Black } } }, 0, 0);
+            var lstModels = new KryptonListBox { Dock = DockStyle.Fill, Height = 100 };
+            modelLayout.Controls.Add(lstModels, 1, 0);
+
+            // Upload Button
+            var btnUploadModel = new KryptonButton { Text = "Upload Model" };
+            modelLayout.Controls.Add(btnUploadModel, 1, 1);
+
+            // Activate Button
+            var btnActivateModel = new KryptonButton { Text = "Activate Selected" };
+            modelLayout.Controls.Add(btnActivateModel, 1, 2);
+
+            // Model Info
+            modelLayout.Controls.Add(new KryptonLabel { Text = "Active Model:", StateCommon = { ShortText = { Color1 = System.Drawing.Color.Black } } }, 0, 3);
+            var lblActiveModel = new KryptonLabel { Text = "(none)", StateCommon = { ShortText = { Color1 = System.Drawing.Color.DarkGreen } } };
+            modelLayout.Controls.Add(lblActiveModel, 1, 3);
+
+            grpModelMgmt.Panel.Controls.Add(modelLayout);
+
+            // Add Model Management group to layout (add before the action bar)
+            layout.Controls.Add(grpModelMgmt);
+
             // === Audit Log ===
             var grpAudit = CreateHeaderGroup("Audit Log", 250);
 

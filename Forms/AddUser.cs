@@ -24,7 +24,16 @@ namespace it13Project.Forms
             InitializeComponent();
 
             // Populate roles from ENUM
-            cmbRole.Items.AddRange(new string[] { "Admin", "Analyst", "Marketing" });
+            cmbRole.Items.AddRange(new string[]
+            {
+                "System Administrator",
+                "Data Analyst",
+                "Marketing Manager",
+                "Game Developer",
+                "Customer Support",
+                "Stakeholder"
+            });
+
             cmbRole.SelectedIndex = 0;
         }
 
@@ -32,13 +41,26 @@ namespace it13Project.Forms
         public AddUser(int userId, string name, string email, string role)
         {
             InitializeComponent();
-            cmbRole.Items.AddRange(new string[] { "Admin", "Analyst", "Marketing" });
+            cmbRole.Items.AddRange(new string[]
+            {
+                "System Administrator",
+                "Data Analyst",
+                "Marketing Manager",
+                "Game Developer",
+                "Customer Support",
+                "Stakeholder"
+            });
 
             // User info
             editingUserId = userId;
             txtName.Text = name;
             txtEmail.Text = email;
             cmbRole.SelectedItem = role;
+
+            if (cmbRole.Items.Contains(role))
+                cmbRole.SelectedItem = role;
+            else
+                cmbRole.SelectedIndex = 0;
 
             // Password left empty unless user wants to change it
             //txtPassword.PlaceholderText = "Leave blank to keep current password";
@@ -70,8 +92,8 @@ namespace it13Project.Forms
                 if (editingUserId == null)
                 {
                     // === INSERT NEW USER ===
-                    query = "INSERT INTO dbo.Users (name, email, role, password_hash) " +
-                            "VALUES (@name, @email, @role, @password_hash)";
+                    query = "INSERT INTO dbo.Users (name, email, role, password_hash, active) " +
+                            "VALUES (@name, @email, @role, @password_hash, 1)";
                 }
                 else
                 {

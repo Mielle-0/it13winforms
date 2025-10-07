@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Krypton.Toolkit;
 using it13Project.Pages;
 using it13Project.UI;
+using it13Project.Data;
 
 namespace it13Project.Forms
 {
@@ -22,8 +23,9 @@ namespace it13Project.Forms
             InitializeComponent();
             // Load the default page
             ActivateButton(btnDashboard);
-            LoadPage(new DashboardPage());
+            LoadPage(new DashboardPage(), "Dashboard");
 
+            ApplyRolePermissions();
             SidebarControl();
         }
 
@@ -32,7 +34,7 @@ namespace it13Project.Forms
         private void ActivateButton(object btnSender)
         {
             if (btnSender == null) return;
-            
+
             if (currentButton != (KryptonButton)btnSender)
             {
                 DisableButton();
@@ -60,8 +62,14 @@ namespace it13Project.Forms
         }
 
         // Load user control
-        private void LoadPage(UserControl page)
+        private void LoadPage(UserControl page, string pageKey)
         {
+            if (!RolePermissions.HasAccess(CurrentUser.Role, pageKey))
+            {
+                MessageBox.Show("You do not have access to this page.");
+                return;
+            }
+
             panelContent.Controls.Clear();
             page.Dock = DockStyle.Fill;
             panelContent.Controls.Add(page);
@@ -77,60 +85,100 @@ namespace it13Project.Forms
             btnModelManagement.Visible = false;
         }
 
+        private void ApplyRolePermissions()
+        {
+            var role = CurrentUser.Role;
+
+            btnDashboard.Visible = RolePermissions.HasAccess(role, "Dashboard");
+            btnGameList.Visible = RolePermissions.HasAccess(role, "GameList");
+            btnSentimentTrends.Visible = RolePermissions.HasAccess(role, "SentimentTrends");
+            btnInfluentialReviewers.Visible = RolePermissions.HasAccess(role, "InfluentialReviewers");
+            btnAlerts.Visible = RolePermissions.HasAccess(role, "Alerts");
+            btnReports.Visible = RolePermissions.HasAccess(role, "Reports");
+            btnModelManagement.Visible = RolePermissions.HasAccess(role, "ModelManagement");
+            btnAdminSettings.Visible = RolePermissions.HasAccess(role, "AdminSettings");
+            btnUserManagement.Visible = RolePermissions.HasAccess(role, "UserManagement");
+            btnReviewPage.Visible = RolePermissions.HasAccess(role, "ReviewPage");
+            btnSentimentPage.Visible = RolePermissions.HasAccess(role, "SentimentPage");
+            btnProfileSettings.Visible = RolePermissions.HasAccess(role, "ProfileSettings");
+        }
+
+
 
         // --- Navigation Button Click Events ---
-        private void btnDashboard_Click(object sender, System.EventArgs e)
+        private void btnDashboard_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new DashboardPage());
+            LoadPage(new DashboardPage(), "Dashboard");
         }
 
-        private void btnGameList_Click(object sender, System.EventArgs e)
+        private void btnGameList_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new GameListPage());
+            LoadPage(new GameListPage(), "GameList");
         }
 
-        private void btnSentimentTrends_Click(object sender, System.EventArgs e)
+        private void btnSentimentTrends_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new SentimentTrendsPage());
+            LoadPage(new SentimentTrendsPage(), "SentimentTrends");
         }
 
-        private void btnInfluentialReviewers_Click(object sender, System.EventArgs e)
+        private void btnInfluentialReviewers_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new InfluentialReviewersPage());
+            LoadPage(new InfluentialReviewersPage(), "InfluentialReviewers");
         }
 
-        private void btnAlerts_Click(object sender, System.EventArgs e)
+        private void btnAlerts_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new AlertsNotificationsPage());
+            LoadPage(new AlertsNotificationsPage(), "Alerts");
         }
 
-        private void btnReports_Click(object sender, System.EventArgs e)
+        private void btnReports_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new ReportsPage());
+            LoadPage(new ReportsPage(), "Reports");
         }
 
-        private void btnModelManagement_Click(object sender, System.EventArgs e)
+        private void btnModelManagement_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new ModelManagementPage());
+            LoadPage(new ModelManagementPage(), "ModelManagement");
         }
 
-        private void btnAdminSettings_Click(object sender, System.EventArgs e)
+        private void btnAdminSettings_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new AdminSettingsPage());
+            LoadPage(new AdminSettingsPage(), "AdminSettings");
         }
 
-        private void btnUserManagement_Click(object sender, System.EventArgs e)
+        private void btnUserManagement_Click(object sender, EventArgs e)
         {
             ActivateButton(sender);
-            LoadPage(new UserManagement());
+            LoadPage(new UserManagement(), "UserManagement");
         }
+
+        private void btnReviewPage_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender);
+            LoadPage(new ReviewPage(), "ReviewPage");
+        }
+
+        private void btnSentimentPage_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender);
+            LoadPage(new SentimentPage(), "SentimentPage");
+        }
+
+        private void btnProfileSettings_Click(object sender, EventArgs e)
+        {
+            ActivateButton(sender);
+            LoadPage(new ProfileSettings(), "ProfileSettings");
+        }
+
+        
+        
     }
 }

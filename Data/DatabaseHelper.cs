@@ -13,9 +13,9 @@ namespace it13Project.Data
 
         // Centralized connection string (you can move this to app.config for production)
         private static readonly string connectionString =
-             @"Data Source=DESKTOP-626PCB6\SQLEXPRESS;Initial Catalog=VideoGameCRM;Integrated Security=True;Trust Server Certificate=True"    // SQL Server SSMS
-            //  "Server=localhost;Database=VideoGameCRM;User Id=root;Password=;"       // XAMPP MySQL
-                ;
+             @"Data Source=;Initial Catalog=;Integrated Security=True;Trust Server Certificate=True";
+            // @"Server=; Database=; User Id=; Password=; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;";
+             
         /// <summary>
         /// Executes a SELECT query and returns a DataTable
         /// </summary>

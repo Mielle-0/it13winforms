@@ -60,11 +60,6 @@ namespace it13Project.Pages
             kpiLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
             kpiLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
 
-            kpiLayout.Controls.Add(CreateModernStatPanel(Properties.Resources.iconGame, "Total Games", "1,235", Color.FromArgb(52, 152, 219)));
-            kpiLayout.Controls.Add(CreateModernStatPanel(Properties.Resources.iconReviews, "Total Reviews", "1,245,678", Color.FromArgb(46, 204, 113)));
-            kpiLayout.Controls.Add(CreateModernStatPanel(Properties.Resources.iconSentiment, "Avg. Sentiment", "82%", Color.FromArgb(155, 89, 182)));
-            kpiLayout.Controls.Add(CreateModernStatPanel(Properties.Resources.iconRecommend, "% Recommended", "76%", Color.FromArgb(241, 196, 15)));
-
             // Charts Row 
             chartsLayout = new TableLayoutPanel
             {
@@ -76,10 +71,6 @@ namespace it13Project.Pages
             chartsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
             chartsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
             chartsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-
-            chartsLayout.Controls.Add(CreateModernSectionPanel("Sentiment Trend", graphType: GraphType.Signal), 0, 0);
-            chartsLayout.Controls.Add(CreateModernSectionPanel("Review Volume", graphType: GraphType.Bar), 1, 0);
-            chartsLayout.Controls.Add(CreateModernSectionPanel("Top 5 Games", graphType: GraphType.Pie), 2, 0);
 
             // Bottom Row 
             bottomLayout = new TableLayoutPanel
@@ -205,6 +196,7 @@ namespace it13Project.Pages
             string title,
             double[] dataX = null,
             double[] dataY = null,
+            string[] labels = null, 
             GraphType graphType = GraphType.Scatter,
             bool showLegend = false)
         {
@@ -241,8 +233,8 @@ namespace it13Project.Pages
             };
 
             // Example data if none provided
-            dataX ??= Enumerable.Range(0, 50).Select(i => (double)i).ToArray();
-            dataY ??= dataX.Select(x => Math.Sin(x * 0.1)).ToArray();
+            // dataX ??= Enumerable.Range(0, 50).Select(i => (double)i).ToArray();
+            // dataY ??= dataX.Select(x => Math.Sin(x * 0.1)).ToArray();
 
             // 🔹 Select graph type
             switch (graphType)
@@ -256,16 +248,35 @@ namespace it13Project.Pages
                     formsPlot.Plot.Add.Signal(dataY,
                         color: ScottPlot.Color.FromColor(ThemeColors.AccentSecondary));
                     break;
-
                 case GraphType.Bar:
-                    var bars = dataX.Zip(dataY, (x, y) => new ScottPlot.Bar
+                    var bars = dataY.Select((val, i) => new ScottPlot.Bar
                     {
-                        Position = x,
-                        Value = y,
-                        FillColor = ScottPlot.Color.FromColor(ThemeColors.AccentPrimary)
+                        Position = i,
+                        Value = val
                     }).ToArray();
-                    formsPlot.Plot.Add.Bars(bars);
+
+                    var barPlot = formsPlot.Plot.Add.Bars(bars);
+
+                    // 🔹 Add labels manually on top of each bar
+                    if (labels == null) break;
+                    
+                    for (int i = 0; i < bars.Length; i++)
+                    {
+                        string labelText = labels[i];
+                        double x = bars[i].Position;
+                        double y = bars[i].Value;
+
+                        bars[i].Label = labels[i];
+                    }
+
+                    barPlot.ValueLabelStyle.FontSize = 14;
+                    formsPlot.Plot.Axes.Margins(bottom: 0, top: .2);
+                    
+
                     break;
+
+
+
 
                 case GraphType.Pie:
                     var pie = formsPlot.Plot.Add.Pie(dataY);
@@ -275,12 +286,10 @@ namespace it13Project.Pages
 
             // Apply title
             formsPlot.Plot.Title(title);
-            formsPlot.ForeColor = ThemeColors.TextColor;
+            // formsPlot.ForeColor = ThemeColors.TextColor;
 
             // Show legend if requested
-            // if (showLegend)
-            //     formsPlot.ShowLegend();
-
+            formsPlot.Plot.Legend.IsVisible = true;
             formsPlot.Refresh();
 
             layout.Controls.Add(formsPlot, 0, 0);
@@ -290,10 +299,13 @@ namespace it13Project.Pages
         }
 
 
+
+
+
         // Alerts / Reports
         private Krypton.Toolkit.KryptonGroup CreateStyledListView(
-            string title, 
-            string[] columns, 
+            string title,
+            string[] columns,
             out ListView listView)
         {
             var group = new Krypton.Toolkit.KryptonGroup

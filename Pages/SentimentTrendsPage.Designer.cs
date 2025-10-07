@@ -2,6 +2,7 @@
 using ScottPlot.WinForms;
 using Krypton.Toolkit;
 using it13Project.UI;
+using it13Project.Data;
 
 namespace it13Project.Pages
 {
@@ -42,25 +43,42 @@ namespace it13Project.Pages
             this.Font = new Font("Segoe UI", 9.75F);
 
             // Filter Panel
-            filterPanel = new FlowLayoutPanel
+            filterPanel = new TableLayoutPanel
             {
                 Dock = DockStyle.Top,
-                Height = 50,
-                Padding = new Padding(5),
-                FlowDirection = FlowDirection.LeftToRight
+                ColumnCount = 7,
+                RowCount = 1,
+                BackColor = ThemeColors.MenuBackground,
+                Padding = new Padding(10),
+                AutoSize = true
             };
+
+            // Row heights
+            filterPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));   // top row: filters
+            filterPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));   // bottom row: chips
 
             lblFilter = new KryptonLabel
             {
                 Text = "Select Games:",
                 AutoSize = true,
-                StateCommon = { ShortText = { Font = new Font("Segoe UI", 10F, FontStyle.Regular) } }
+                ForeColor = ThemeColors.TextColor,
+                StateCommon = { ShortText = { Font = new Font("Segoe UI", 10F, FontStyle.Regular), Color1 = ThemeColors.TextColor } }
             };
 
-            clbGames = new KryptonCheckedListBox
+            // Search textbox
+            txtGameSearch = new KryptonTextBox
             {
                 Width = 250,
-                Height = 25
+                Height = 25,
+                CueHint = { CueHintText = "Search Games..." }
+            };
+
+            // Suggestions dropdown (hidden by default)
+            lstSuggestions = new ListBox
+            {
+                Width = 250,
+                Height = 100,
+                Visible = false
             };
 
             // Date range controls
@@ -69,20 +87,22 @@ namespace it13Project.Pages
                 Text = "Date Range:",
                 AutoSize = true,
                 Margin = new Padding(15, 5, 0, 0), // spacing from game selector
-                StateCommon = { ShortText = { Font = new Font("Segoe UI", 10F, FontStyle.Regular) } }
+                StateCommon = { ShortText = { Font = new Font("Segoe UI", 10F, FontStyle.Regular), Color1 = ThemeColors.TextColor } }
             };
 
             dtpStart = new KryptonDateTimePicker
             {
                 Width = 120,
                 Format = DateTimePickerFormat.Short,
-                Value = DateTime.Today.AddMonths(-3) // default: 3 months back
+                Value = DateTime.Today.AddMonths(-3),
+                ShowCheckBox = true
             };
 
             lblTo = new KryptonLabel
             {
                 Text = "to",
                 AutoSize = true,
+                StateCommon = { ShortText = { Color1 = ThemeColors.TextColor } },
                 Margin = new Padding(5, 5, 5, 0)
             };
 
@@ -90,24 +110,120 @@ namespace it13Project.Pages
             {
                 Width = 120,
                 Format = DateTimePickerFormat.Short,
-                Value = DateTime.Today
+                Value = DateTime.Today,
+                ShowCheckBox = true
             };
 
-            // Add controls to filter panel
-            filterPanel.Controls.Add(lblFilter);
-            filterPanel.Controls.Add(clbGames);
-            filterPanel.Controls.Add(lblDateRange);
-            filterPanel.Controls.Add(dtpStart);
-            filterPanel.Controls.Add(lblTo);
-            filterPanel.Controls.Add(dtpEnd);
+            btnApplyFilters = new KryptonButton
+            {
+                Text = "Apply Filters",
+                OverrideDefault = { Back = { Color1 = ThemeColors.AccentPrimary } },
+                StateCommon = { Content = { ShortText = { Color1 = Color.Black } } },
+                Margin = new Padding(10, 0, 0, 0),
+            };
+
+            btnShowSelectedGames = new KryptonButton
+            {
+                Text = "Selected Games ▼",
+                Width = 150,
+                Height = 25,
+                Margin = new Padding(5, 0, 0, 0)
+            };
+
+            // Container for selected games ("chips")
+            selectedGamesPanel = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = true,
+                Padding = new Padding(5),
+                BackColor = ThemeColors.ContentBackground,
+                BorderStyle = BorderStyle.FixedSingle,
+                Visible = false,
+                // Width = filterPanel.Width - 20
+                MaximumSize = new Size(800, 0)
+            };
+
+            btnShowSelectedGames.Click += BtnShowSelectedGames_Click;
+            btnApplyFilters.Click += BtnApplyFilters_Click;
+
+            txtGameSearch.TextChanged += (s, e) =>
+            {
+                var query = txtGameSearch.Text.Trim();
+                if (string.IsNullOrWhiteSpace(query))
+                {
+                    lstSuggestions.Visible = false;
+                    return;
+                }
+
+                var matches = _allGames
+                    .Where(g => g.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .Take(5)
+                    .ToList();
+
+                lstSuggestions.Items.Clear();
+                foreach (var m in matches)
+                    lstSuggestions.Items.Add(m);
+
+                if (matches.Any())
+                {
+                    // 🔹 Position dropdown under the search box
+                    var screenPos = txtGameSearch.Parent.PointToScreen(txtGameSearch.Location);
+                    var formPos = this.PointToClient(screenPos);
+
+                    lstSuggestions.Location = new Point(formPos.X, formPos.Y + txtGameSearch.Height);
+                    lstSuggestions.BringToFront();
+                    lstSuggestions.Visible = true;
+                }
+                else
+                {
+                    lstSuggestions.Visible = false;
+                }
+            };
+
+            lstSuggestions.Click += (s, e) =>
+            {
+                if (lstSuggestions.SelectedItem is GameInfo selectedGame)
+                {
+                    AddSelectedGameChip(selectedGame);
+                    txtGameSearch.Clear();
+                    lstSuggestions.Visible = false;
+                }
+            };
+
+
+            // Row 0: filters
+            filterPanel.Controls.Add(lblFilter, 0, 0);
+            filterPanel.Controls.Add(txtGameSearch, 1, 0);
+            filterPanel.Controls.Add(lblDateRange, 2, 0);
+            filterPanel.Controls.Add(dtpStart, 3, 0);
+            filterPanel.Controls.Add(lblTo, 4, 0);
+            filterPanel.Controls.Add(dtpEnd, 5, 0);
+            filterPanel.Controls.Add(btnApplyFilters, 6, 0);
+            filterPanel.Controls.Add(btnShowSelectedGames, 7, 0); // add in top row
+
+            // Row 1: chips (span across all columns)
+            // filterPanel.Controls.Add(selectedGamesPanel, 0, 1);
+            // filterPanel.SetColumnSpan(selectedGamesPanel, 7);
+
+
+            this.Controls.Add(lstSuggestions);
+            lstSuggestions.BringToFront();
+            lstSuggestions.Visible = false;
+            
+            // Add it to the top-level form (or container), not inside filterPanel
+            this.Controls.Add(selectedGamesPanel);
+            selectedGamesPanel.BringToFront();
+
 
             // KPI Summary Panel
             kpiPanel = new FlowLayoutPanel
             {
                 Dock = DockStyle.Top,
-                Height = 80,
+                AutoSize = true,
                 FlowDirection = FlowDirection.LeftToRight,
-                Padding = new Padding(5)
+                Padding = new Padding(5),
+                BackColor = ThemeColors.ContentBackground
             };
 
             lblTotalReviews = new KryptonLabel { Text = "Total Reviews: 0", Width = 200, StateCommon = { ShortText = { Font = new Font("Segoe UI", 11F, FontStyle.Bold) } } };
@@ -134,19 +250,6 @@ namespace it13Project.Pages
             chartSplit.Panel1.Controls.Add(sentimentTrendPlot);
             chartSplit.Panel2.Controls.Add(sentimentPiePlot);
 
-            // Review Feed (Bottom)
-            // reviewGrid = new KryptonDataGridView
-            // {
-            //     Dock = DockStyle.Bottom,
-            //     Height = 200,
-            //     AllowUserToAddRows = false,
-            //     ReadOnly = true,
-            //     AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
-            // };
-            // reviewGrid.Columns.Add("ReviewText", "Review");
-            // reviewGrid.Columns.Add("Sentiment", "Sentiment");
-            // reviewGrid.Columns.Add("Confidence", "Confidence (%)");
-            // --- Review Feed (Bottom) ---
             reviewGroup = CreateStyledListView(
                 "Recent Reviews",
                 new[] { "Review", "Sentiment", "Confidence (%)" },
@@ -154,28 +257,24 @@ namespace it13Project.Pages
             );
 
             reviewGroup.Dock = DockStyle.Bottom;
-            reviewGroup.Height = 250; // taller to match bigger font
-            reviewGroup.Width = this.ClientSize.Width; // take full width
-
-            filterPanel.BackColor = ThemeColors.ContentBackground;
-            kpiPanel.BackColor = ThemeColors.ContentBackground;
+            reviewGroup.Height = 250;
+            reviewGroup.Width = this.ClientSize.Width;
 
             // Add everything to the control
             this.Controls.Add(chartSplit);
-            // this.Controls.Add(reviewGrid);
-            
             this.Controls.Add(reviewGroup);
             this.Controls.Add(kpiPanel);
             this.Controls.Add(filterPanel);
 
             this.BackColor = ThemeColors.ContentBackground;
             this.ResumeLayout(false);
+            this.AutoScroll = true;
         }
 
 
         private Krypton.Toolkit.KryptonGroup CreateStyledListView(
-            string title, 
-            string[] columns, 
+            string title,
+            string[] columns,
             out ListView listView)
         {
             var group = new Krypton.Toolkit.KryptonGroup
@@ -260,8 +359,18 @@ namespace it13Project.Pages
                 var bgColor = e.Item.Selected ? ThemeColors.AccentPrimary : lv.BackColor;
                 var textColor = e.Item.Selected ? ThemeColors.TextColor : lv.ForeColor;
 
+                // e.Graphics.FillRectangle(new SolidBrush(bgColor), e.Bounds);
+                // TextRenderer.DrawText(e.Graphics, e.SubItem.Text, lv.Font, e.Bounds, textColor);
                 e.Graphics.FillRectangle(new SolidBrush(bgColor), e.Bounds);
-                TextRenderer.DrawText(e.Graphics, e.SubItem.Text, lv.Font, e.Bounds, textColor);
+
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    e.SubItem.Text,
+                    lv.Font,
+                    e.Bounds,
+                    textColor,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
             };
 
             layout.Controls.Add(lblTitle, 0, 0);
@@ -271,6 +380,15 @@ namespace it13Project.Pages
 
             // 👇 assign after lambdas are done
             listView = lv;
+            lv.Resize += (s, e) =>
+            {
+                if (lv.Columns.Count > 0)
+                {
+                    int fixedWidth = lv.Columns.Cast<ColumnHeader>().Skip(1).Sum(c => c.Width);
+                    lv.Columns[0].Width = lv.ClientSize.Width - fixedWidth;
+                }
+            };
+
 
             return group;
         }
@@ -285,12 +403,17 @@ namespace it13Project.Pages
                             lblFilter, lblDateRange, lblTo;
         private FormsPlot sentimentTrendPlot, sentimentPiePlot;
         // KPI Labels
-        private FlowLayoutPanel filterPanel, kpiPanel;
+        private FlowLayoutPanel kpiPanel, selectedGamesPanel;
+        private TableLayoutPanel filterPanel;
         private KryptonDateTimePicker dtpStart, dtpEnd;
         private KryptonDataGridView reviewGrid;
         private KryptonCheckedListBox clbGames;
         private KryptonGroup reviewGroup;
         private ListView reviewListView;
+        private KryptonButton btnApplyFilters, btnShowSelectedGames;
+        private KryptonTextBox txtGameSearch;
+        private ListBox lstSuggestions;
+
 
     }
 }

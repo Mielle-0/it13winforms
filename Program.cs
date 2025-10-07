@@ -13,9 +13,15 @@ namespace it13Project
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            //Application.Run(new Form1());
-            Application.Run(new MainForm());
-            
+
+
+            Application.Run(new Form1());
+
+            // CurrentUser.UserId = 2;
+            // CurrentUser.Name = "admin";
+            // CurrentUser.Role = "System Administrator";
+            // Application.Run(new MainForm());
+
         }
     }
 }

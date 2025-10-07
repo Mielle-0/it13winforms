@@ -54,17 +54,24 @@ namespace it13Project.Forms
             btnModelManagement = new KryptonButton();
             btnAdminSettings = new KryptonButton();
             btnUserManagement = new KryptonButton();
+            btnReviewPage = new KryptonButton();
+            btnSentimentPage = new KryptonButton();
+            btnProfileSettings = new KryptonButton();
 
             // panelMenu
             panelMenu.StateCommon.Color1 = ThemeColors.MenuBackground;
             panelMenu.Dock = DockStyle.Left;
             panelMenu.Width = 230;
             panelMenu.Padding = new Padding(10, 10, 10, 10);
+            panelMenu.AutoScroll = true;
+            // panelMenu.AutoScrollMinSize = 1;
+            panelMenu.VerticalScroll.Visible = false;
 
             // Add Buttons to Sidebar
             panelMenu.Controls.AddRange(new Control[]
             {
-                btnUserManagement, btnAdminSettings,
+                btnProfileSettings, btnUserManagement, btnAdminSettings,
+                btnReviewPage, btnSentimentPage,
                 btnModelManagement, btnReports,
                 btnAlerts, btnInfluentialReviewers,
                 btnSentimentTrends, btnGameList,
@@ -108,13 +115,16 @@ namespace it13Project.Forms
             // Buttons
             StyleKryptonButton(btnDashboard, "📊 Dashboard", btnDashboard_Click);
             StyleKryptonButton(btnGameList, "🎮 Game List", btnGameList_Click);
-            StyleKryptonButton(btnSentimentTrends, "📉 Sentiment Trends", btnSentimentTrends_Click);
+            StyleKryptonButton(btnSentimentTrends, "📉 Trends", btnSentimentTrends_Click);
             StyleKryptonButton(btnInfluentialReviewers, "🌟 Influential Reviewers", btnInfluentialReviewers_Click);
             StyleKryptonButton(btnAlerts, "🔔 Alerts", btnAlerts_Click);
             StyleKryptonButton(btnReports, "📈 Reports", btnReports_Click);
             StyleKryptonButton(btnModelManagement, "📊 Model Management", btnModelManagement_Click);
             StyleKryptonButton(btnAdminSettings, "⚙️ Admin Settings", btnAdminSettings_Click);
             StyleKryptonButton(btnUserManagement, "👥 User Management", btnUserManagement_Click);
+            StyleKryptonButton(btnReviewPage, "📋 Reviews", btnReviewPage_Click);
+            StyleKryptonButton(btnSentimentPage, "💞 Sentiments", btnSentimentPage_Click);
+            StyleKryptonButton(btnProfileSettings, "👤 Profile", btnProfileSettings_Click);
 
             // Highlight dashboard (active state)
             btnDashboard.StateCommon.Back.Color1 = ThemeColors.AccentPrimary;
@@ -172,19 +182,22 @@ namespace it13Project.Forms
 
         #endregion
 
-        private Krypton.Toolkit.KryptonPanel panelMenu;
-        private Krypton.Toolkit.KryptonButton btnDashboard;
-        private Krypton.Toolkit.KryptonPanel panelLogo;
-        private Krypton.Toolkit.KryptonButton btnAdminSettings;
-        private Krypton.Toolkit.KryptonButton btnModelManagement;
-        private Krypton.Toolkit.KryptonButton btnReports;
-        private Krypton.Toolkit.KryptonButton btnAlerts;
-        private Krypton.Toolkit.KryptonButton btnInfluentialReviewers;
-        private Krypton.Toolkit.KryptonButton btnSentimentTrends;
-        private Krypton.Toolkit.KryptonButton btnGameList;
-        private Krypton.Toolkit.KryptonButton btnUserManagement;
-        private Krypton.Toolkit.KryptonLabel lblLogo;
-        private Krypton.Toolkit.KryptonPanel panelContent;
+        private KryptonPanel panelMenu;
+        private KryptonButton btnDashboard;
+        private KryptonPanel panelLogo;
+        private KryptonButton btnAdminSettings;
+        private KryptonButton btnModelManagement;
+        private KryptonButton btnReports;
+        private KryptonButton btnAlerts;
+        private KryptonButton btnInfluentialReviewers;
+        private KryptonButton btnSentimentTrends;
+        private KryptonButton btnGameList;
+        private KryptonButton btnUserManagement;
+        private KryptonButton btnReviewPage;
+        private KryptonButton btnSentimentPage;
+        private KryptonButton btnProfileSettings;
+        private KryptonLabel lblLogo;
+        private KryptonPanel panelContent;
 
     }
 
